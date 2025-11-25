@@ -44,6 +44,10 @@ def home():
 def logo():
     return send_from_directory('.', 'ds-logo-default.svg')
 
+@app.route('/docu-logo.svg')
+def favicon():
+    return send_from_directory('.', 'docu-logo.svg')
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
