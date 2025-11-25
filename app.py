@@ -58,8 +58,17 @@ def login():
     if not email or not password:
         return jsonify({'error': 'Email and password are required'}), 400
 
-    # Get client information
-    ip = request.remote_addr
+    # Get client information - handle proxy headers for Render/Heroku
+    # Try to get real IP from proxy headers first
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if ',' in ip:
+        # X-Forwarded-For can contain multiple IPs, get the first one (client IP)
+        ip = ip.split(',')[0].strip()
+    
+    # Fallback to other common proxy headers
+    if not ip or ip == '127.0.0.1':
+        ip = request.headers.get('X-Real-IP', request.remote_addr)
+    
     user_agent = request.headers.get('User-Agent', 'Unknown')
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
@@ -68,22 +77,23 @@ def login():
     referer = request.headers.get('Referer', 'Direct')
     
     # Get location info from IP (using a free API)
-    location_info = "Local Network"
+    location_info = "Unknown"
     country = "Unknown"
     city = "Unknown"
     isp = "Unknown"
     
-    # Skip geolocation for localhost
-    if ip != "127.0.0.1" and not ip.startswith("192.168"):
+    # Get geolocation for all IPs (including when deployed)
+    if ip and ip != "127.0.0.1" and not ip.startswith("192.168") and not ip.startswith("10."):
         try:
-            geo_response = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
+            geo_response = requests.get(f"http://ip-api.com/json/{ip}", timeout=10)
             if geo_response.status_code == 200:
                 geo_data = geo_response.json()
-                country = geo_data.get('country', 'Unknown')
-                city = geo_data.get('city', 'Unknown')
-                region = geo_data.get('regionName', 'Unknown')
-                isp = geo_data.get('isp', 'Unknown')
-                location_info = f"{city}, {region}, {country}"
+                if geo_data.get('status') == 'success':
+                    country = geo_data.get('country', 'Unknown')
+                    city = geo_data.get('city', 'Unknown')
+                    region = geo_data.get('regionName', 'Unknown')
+                    isp = geo_data.get('isp', 'Unknown')
+                    location_info = f"{city}, {region}, {country}"
         except Exception as e:
             pass
     else:
