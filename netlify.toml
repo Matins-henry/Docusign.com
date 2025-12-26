@@ -1,0 +1,19 @@
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/otp-method"
+  to = "/otp-method.html"
+  status = 200
+
+[[redirects]]
+  from = "/otp-verify"
+  to = "/otp-verify.html"
+  status = 200
